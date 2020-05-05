@@ -1,0 +1,28 @@
+---
+title: "jeff_q.Rmd"
+author: "Jose Perales"
+date: "5/4/2020"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+setwd('..')
+
+
+iris.DF <- read.csv(paste0(getwd(), "/data/validated/iris.csv"))
+
+
+```
+
+```{r}
+
+
+plot <- ggplot(iris.DF, aes(x = sepal.width..cm., y = sepal.length..cm.))
+
+plot <- plot + geom_point()
+
+plot
+
+```
