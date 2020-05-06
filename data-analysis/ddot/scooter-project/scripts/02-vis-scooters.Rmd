@@ -1,0 +1,77 @@
+---
+title: "ddot_scooter_project"
+author: "Jose Perales"
+date: "September 24, 2019"
+output: html_document
+---
+
+```{r}
+library(sf)
+library(tidyverse)
+library(tidycensus)
+
+options(tigris_use_cache = TRUE)
+
+#my_acs_key <-
+
+#census_api_key(my_acs_key, install = TRUE)
+
+censusDF <- get_acs(state = "DC",
+                    geography = "block group",
+                    variables = "B19013_001",
+                    geometry = TRUE)
+
+#censusDF <- left_join(censusDF, vehicleDF)
+```
+
+```{r}
+
+setwd('..')
+paste0(getwd(), "/data/source/scooter.csv")
+
+scooterDF <- read.csv(paste0(getwd(), "/data/source/scooter_data.csv"))
+
+```
+
+```{r}
+
+scooterDF %>% 
+  mutate(
+    lat = as.numeric(lat),
+    lon = as.numeric(lon)
+    )
+
+scooterDF <- st_as_sf(scooterDF, 
+                      coords = c("lon", "lat"), 
+                      crs = st_crs(censusDF), 
+                      agr = "constant")
+
+```
+
+```{r}
+
+scooter_in_tract <- st_join(scooterDF, censusDF, join = st_within)
+
+scooter_tract_count <- count(as_tibble(scooter_in_tract), GEOID)
+
+
+censusDF <- left_join(censusDF, scooter_tract_count)
+```
+
+```{r}
+
+plot <- ggplot() +
+  geom_sf(data = censusDF, aes(fill = n))
+
+```
+
+```{r}
+
+setwd('..')
+
+ggsave(
+  "dc_scooters.png",
+  path = paste0(getwd(), "/data/vis/"),
+  device = "png"
+  )
+```
